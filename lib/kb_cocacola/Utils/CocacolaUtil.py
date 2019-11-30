@@ -6,6 +6,7 @@ import sys
 import time
 import uuid
 import zipfile
+from Bio import SeqIO
 
 from installed_clients.AssemblyUtilClient import AssemblyUtil
 from installed_clients.DataFileUtilClient import DataFileUtil
@@ -24,8 +25,9 @@ def log(message, prefix_newline=False):
 
 class CocacolaUtil:
     CONCOCT_BASE_PATH = '/kb/deployment/bin/CONCOCT'
-    CONCOCT_RESULT_DIRECTORY = 'cocacola_output_dir'
-    CONCOCT_BIN_RESULT_DIR = 'final_bins'
+    COCACOLA_BASE_PATH = '/kb/module/lib/kb_cocacola/bin/COCACOLA-python'
+    BINNER_RESULT_DIRECTORY = 'cocacola_output_dir'
+    BINNER_BIN_RESULT_DIR = 'final_bins'
     MAPPING_THREADS = 16
     BBMAP_MEM = '30g'
 
@@ -142,12 +144,34 @@ class CocacolaUtil:
 
         return assembly_clean
 
+    def fasta_filter_contigs_generator(self, fasta_record_iter, min_contig_length):
+        """ generates SeqRecords iterator for writing from a legacy contigset object """
+        rows = 0
+        rows_added = 0
+        for record in fasta_record_iter:
+            rows += 1
+            if len(record.seq) >= min_contig_length:
+                rows_added += 1
+                yield record
+        print(f' - filtered out {rows - rows_added} of {rows} contigs that were shorter '
+              f'than {(min_contig_length)} bp.')
+
+    def filter_contigs_by_length(self, fasta_file_path, min_contig_length):
+        """ removes all contigs less than the min_contig_length provided """
+        filtered_fasta_file_path = os.path.abspath(fasta_file_path).split('.fa')[0] + "_filtered.fa"
+
+        fasta_record_iter = SeqIO.parse(fasta_file_path, 'fasta')
+        SeqIO.write(self.fasta_filter_contigs_generator(fasta_record_iter, min_contig_length),
+                    filtered_fasta_file_path, 'fasta')
+
+        return filtered_fasta_file_path
+
     def generate_stats_for_genome_bins(self, task_params, genome_bin_fna_file, bbstats_output_file):
         """
         generate_command: bbtools stats.sh command
         """
         log("running generate_stats_for_genome_bins on {}".format(genome_bin_fna_file))
-        genome_bin_fna_file = os.path.join(self.scratch, self.CONCOCT_RESULT_DIRECTORY, genome_bin_fna_file)
+        genome_bin_fna_file = os.path.join(self.scratch, self.BINNER_RESULT_DIRECTORY, genome_bin_fna_file)
         command = '/bin/bash stats.sh in={} format=3 > {}'.format(genome_bin_fna_file, bbstats_output_file)
         self._run_command(command)
         bbstats_output = open(bbstats_output_file, 'r').readlines()[1]
@@ -358,7 +382,7 @@ class CocacolaUtil:
             fastq_type = read_type[i]
 
             sam = os.path.basename(fastq).split('.fastq')[0] + ".sam"
-            sam = os.path.join(self.CONCOCT_RESULT_DIRECTORY, sam)
+            sam = os.path.join(self.BINNER_RESULT_DIRECTORY, sam)
 
             if fastq_type == 'interleaved':  # make sure working - needs tests
                 log("Running interleaved read mapping mode")
@@ -390,24 +414,6 @@ class CocacolaUtil:
 
         return depth_file_path
 
-    def fix_generate_cocacola_command_ui_bug(self, task_params):
-        # needed to get checkbox for UI to work with string objects, for some
-        # reason strings are converted to numerics when running inside KBase UI.
-        parameter_no_total_coverage = task_params['no_total_coverage']
-        parameter_no_cov_normalization = task_params['no_cov_normalization']
-
-        if task_params['no_total_coverage'] is 1:
-            parameter_no_total_coverage = '--no_total_coverage'
-        elif task_params['no_total_coverage'] is 0:
-            parameter_no_total_coverage = ' '
-
-        if task_params['no_cov_normalization'] is 1:
-            parameter_no_cov_normalization = '--no_cov_normalization'
-        elif task_params['no_cov_normalization'] is 0:
-            parameter_no_cov_normalization = ' '
-
-        return (parameter_no_total_coverage, parameter_no_cov_normalization)
-
     def generate_cocacola_cut_up_fasta_command(self, task_params):
         """
         generate_command: cocacola cut_up_fasta
@@ -422,7 +428,7 @@ class CocacolaUtil:
         command += '{} '.format(contig_file_path)
         command += '-c {} '.format(contig_split_size)
         command += '-o {} '.format(contig_split_overlap)
-        command += '--merge_last -b temp.bed > {}/split_contigs.fa'.format(self.CONCOCT_RESULT_DIRECTORY)
+        command += '--merge_last -b temp.bed > {}/split_contigs.fa'.format(self.BINNER_RESULT_DIRECTORY)
         log('Generated cocacola_cut_up_fasta command: {}'.format(command))
 
         self._run_command(command)
@@ -433,9 +439,46 @@ class CocacolaUtil:
         """
         log("\n\nRunning generate_cocacola_coverage_table_from_bam")
         command = 'python {}/scripts/concoct_coverage_table.py temp.bed '.format(self.CONCOCT_BASE_PATH)
-        command += '{}/*_sorted.bam > '.format(self.CONCOCT_RESULT_DIRECTORY)
-        command += '{}/coverage_table.tsv'.format(self.CONCOCT_RESULT_DIRECTORY)
+        command += '{}/*_sorted.bam > '.format(self.BINNER_RESULT_DIRECTORY)
+        command += '{}/coverage_table.tsv'.format(self.BINNER_RESULT_DIRECTORY)
         log('Generated cocacola generate coverage table from bam command: {}'.format(command))
+
+        self._run_command(command)
+
+
+    def generate_cocacola_input_table_from_bam(self, task_params):
+        """
+        generate_command: cocacola generate input table
+        """
+        log("\n\nRunning generate_cocacola_input_table_from_bam")
+        command = 'python {}/scripts/gen_input_table.py '.format(self.CONCOCT_BASE_PATH)
+
+        command += '{}/split_contigs.fa '.format(self.BINNER_RESULT_DIRECTORY)
+        command += '{}/*_sorted.bam > '.format(self.BINNER_RESULT_DIRECTORY)
+        command += '{}/coverage_table.tsv'.format(self.BINNER_RESULT_DIRECTORY)
+        log('Generated cocacola generate input table from bam command: {}'.format(command))
+        calc_contigs = 0
+        for line in open('{}/split_contigs.fa'.format(self.BINNER_RESULT_DIRECTORY)):
+            if line.startswith(">"):
+                calc_contigs += 1
+        log('Calc-contigs: {}'.format(calc_contigs))
+        task_params['calc_contigs'] = calc_contigs
+        self._run_command(command)
+
+
+    def generate_cocacola_composition_table(self, task_params):
+        """
+        generate_command: cocacola generate composition table
+        """
+        log("\n\nRunning generate_cocacola_composition_table")
+        calc_contigs = task_params['calc_contigs']
+        kmer_size = task_params['kmer_size']
+        command = 'python {}/scripts/fasta_to_features.py '.format(self.CONCOCT_BASE_PATH)
+        command += '{}/split_contigs.fa '.format(self.BINNER_RESULT_DIRECTORY)
+        command += '{} '.format(calc_contigs)
+        command += '{} '.format(kmer_size)
+        command += '{}/split_contigs_kmer_{}.csv'.format(self.BINNER_RESULT_DIRECTORY,kmer_size)
+        log('Generated cocacola generate input table from bam command: {}'.format(command))
 
         self._run_command(command)
 
@@ -446,28 +489,27 @@ class CocacolaUtil:
 
         min_contig_length = task_params['min_contig_length']
         kmer_size = task_params['kmer_size']
-        max_clusters_for_vgmm = task_params['max_clusters_for_vgmm']
-        max_iterations_for_vgmm = task_params['max_iterations_for_vgmm']
-        total_percentage_pca = task_params['total_percentage_pca']
-        parameter_no_total_coverage, parameter_no_cov_normalization = \
-            self.fix_generate_cocacola_command_ui_bug(task_params)
 
         log("\n\nRunning generate_cocacola_command")
-        command = 'python {}/bin/concoct '.format(self.CONCOCT_BASE_PATH)
-        command += '--composition_file {}/split_contigs.fa '.format(self.CONCOCT_RESULT_DIRECTORY)
-        command += '-l {} '.format(min_contig_length)
-        command += '-b {} '.format(self.CONCOCT_RESULT_DIRECTORY)
-        command += '--coverage_file {}/coverage_table.tsv '.format(self.CONCOCT_RESULT_DIRECTORY)
-        command += '-t {} '.format(self.MAPPING_THREADS)
-        command += '-k {} '.format(kmer_size)
-        command += '-c {} '.format(max_clusters_for_vgmm)
-        command += '-i {} '.format(max_iterations_for_vgmm)
-        command += '--total_percentage_pca {} '.format(total_percentage_pca)
-        command += '{} '.format(parameter_no_cov_normalization)
-        command += '{}'.format(parameter_no_total_coverage)
+        command = 'python {}/cocacola.py '.format(self.COCACOLA_BASE_PATH)
+        command += '--contig_file {}/split_contigs.fa '.format(self.BINNER_RESULT_DIRECTORY)
+        command += '--abundance_profiles {}/coverage_table.tsv '.format(self.BINNER_RESULT_DIRECTORY)
+        command += '--composition_profiles {}/split_contigs_kmer_{}.csv '.format(self.BINNER_RESULT_DIRECTORY,kmer_size)
+        command += '--output {}/cocacola_output_clusters_min{}.csv'.format(self.BINNER_RESULT_DIRECTORY, min_contig_length)
+
         log('Generated cocacola command: {}'.format(command))
 
         self._run_command(command)
+
+    def add_header_to_post_clustering_file(self, task_params):
+        min_contig_length = task_params['min_contig_length']
+        header = "contig_id,cluster_id"
+        with open('{}/cocacola_output_clusters_min{}_headers.csv'.format(self.BINNER_RESULT_DIRECTORY, min_contig_length), 'w') as outfile:
+            outfile.write(header)
+            with open('{}/cocacola_output_clusters_min{}.csv'.format(self.BINNER_RESULT_DIRECTORY, min_contig_length), 'r') as datafile:
+                for line in datafile:
+                    outfile.write(line)
+
 
     def generate_cocacola_post_clustering_merging_command(self, task_params):
         """
@@ -477,8 +519,8 @@ class CocacolaUtil:
         log("\n\nRunning generate_cocacola_post_clustering_merging_command")
 
         command = 'python {}/scripts/merge_cutup_clustering.py '.format(self.CONCOCT_BASE_PATH)
-        command += '{}/clustering_gt{}.csv > '.format(self.CONCOCT_RESULT_DIRECTORY, min_contig_length)
-        command += '{}/clustering_merged.csv'.format(self.CONCOCT_RESULT_DIRECTORY)
+        command += '{}/cocacola_output_clusters_min{}_headers.csv > '.format(self.BINNER_RESULT_DIRECTORY, min_contig_length)
+        command += '{}/clustering_merged_min{}.csv'.format(self.BINNER_RESULT_DIRECTORY, min_contig_length)
         log('Generated generate_cocacola_post_clustering_merging command: {}'.format(command))
 
         self._run_command(command)
@@ -490,13 +532,14 @@ class CocacolaUtil:
         log("\n\nRunning generate_cocacola_extract_fasta_bins_command")
 
         contig_file_path = task_params['contig_file_path']
+        min_contig_length = task_params['min_contig_length']
 
-        bin_result_directory = self.CONCOCT_RESULT_DIRECTORY + '/' + self.CONCOCT_BIN_RESULT_DIR
+        bin_result_directory = self.BINNER_RESULT_DIRECTORY + '/' + self.BINNER_BIN_RESULT_DIR
         self._mkdir_p(bin_result_directory)
         command = 'python {}/scripts/extract_fasta_bins.py '.format(self.CONCOCT_BASE_PATH)
         command += '{} '.format(contig_file_path)
-        command += '{}/clustering_merged.csv '.format(self.CONCOCT_RESULT_DIRECTORY)
-        command += '--output_path {}/{}'.format(self.CONCOCT_RESULT_DIRECTORY, self.CONCOCT_BIN_RESULT_DIR)
+        command += '{}/clustering_merged_min{}.csv '.format(self.BINNER_RESULT_DIRECTORY, min_contig_length)
+        command += '--output_path {}/{}'.format(self.BINNER_RESULT_DIRECTORY, self.BINNER_BIN_RESULT_DIR)
         log('Generated generate_cocacola_extract_fasta_bins_command command: {}'.format(command))
 
         self._run_command(command)
@@ -506,8 +549,8 @@ class CocacolaUtil:
         generate_command: generate renamed bins
         """
         log("\n\nRunning rename_and_standardize_bin_names")
-        path_to_cocacola_result_bins = os.path.abspath(self.CONCOCT_RESULT_DIRECTORY) + \
-            '/' + self.CONCOCT_BIN_RESULT_DIR + '/'
+        path_to_cocacola_result_bins = os.path.abspath(self.BINNER_RESULT_DIRECTORY) + \
+            '/' + self.BINNER_BIN_RESULT_DIR + '/'
         for dirname, subdirs, files in os.walk(path_to_cocacola_result_bins):
             for file in files:
                 if file.endswith('.fa'):
@@ -520,16 +563,16 @@ class CocacolaUtil:
         generate_command: generate binned contig summary command
         """
         log("\n\nRunning make_binned_contig_summary_file_for_binning_apps")
-        path_to_cocacola_result = os.path.abspath(self.CONCOCT_RESULT_DIRECTORY)
-        path_to_cocacola_result_bins = '{}/{}/'.format(path_to_cocacola_result, self.CONCOCT_BIN_RESULT_DIR)
+        path_to_cocacola_result = os.path.abspath(self.BINNER_RESULT_DIRECTORY)
+        path_to_cocacola_result_bins = '{}/{}/'.format(path_to_cocacola_result, self.BINNER_BIN_RESULT_DIR)
         path_to_summary_file = path_to_cocacola_result_bins + 'binned_contig.summary'
         with open(path_to_summary_file, 'w+') as f:
             f.write("Bin name\tCompleteness\tGenome size\tGC content\n")
             for dirname, subdirs, files in os.walk(path_to_cocacola_result_bins):
                 for file in files:
                     if file.endswith('.fasta'):
-                        genome_bin_fna_file = os.path.join(self.CONCOCT_BIN_RESULT_DIR, file)
-                        bbstats_output_file = os.path.join(self.scratch, self.CONCOCT_RESULT_DIRECTORY,
+                        genome_bin_fna_file = os.path.join(self.BINNER_BIN_RESULT_DIR, file)
+                        bbstats_output_file = os.path.join(self.scratch, self.BINNER_RESULT_DIRECTORY,
                                                            genome_bin_fna_file).split('.fasta')[0] + ".bbstatsout"
                         bbstats_output = self.generate_stats_for_genome_bins(task_params,
                                                                              genome_bin_fna_file,
@@ -562,10 +605,10 @@ class CocacolaUtil:
                         file.endswith('.bai') or
                        file.endswith('.summary')):
                             continue
-                    if (dirname.endswith(self.CONCOCT_BIN_RESULT_DIR)):
+                    if (dirname.endswith(self.BINNER_BIN_RESULT_DIR)):
                             continue
                     zip_file.write(os.path.join(dirname, file), file)
-                if (dirname.endswith(self.CONCOCT_BIN_RESULT_DIR)):
+                if (dirname.endswith(self.BINNER_BIN_RESULT_DIR)):
                     baseDir = os.path.basename(dirname)
                     for file in files:
                         full = os.path.join(dirname, file)
@@ -715,7 +758,13 @@ class CocacolaUtil:
 
         # clean the assembly file so that there are no spaces in the fasta headers
         assembly_clean = self.retrieve_and_clean_assembly(task_params)
-        task_params['contig_file_path'] = assembly_clean
+
+
+        assembly_clean_filtered = self.filter_contigs_by_length(assembly_clean, task_params['min_contig_length'])
+
+
+        task_params['contig_file_path'] = assembly_clean_filtered
+        assembly_clean = assembly_clean_filtered # need to clean this up, ugly redundant variable usage
 
         # get reads
         (reads_list_file, read_type) = self.stage_reads_list_file(task_params['reads_list'])
@@ -723,7 +772,7 @@ class CocacolaUtil:
         task_params['reads_list_file'] = reads_list_file
 
         # prep result directory
-        result_directory = os.path.join(self.scratch, self.CONCOCT_RESULT_DIRECTORY)
+        result_directory = os.path.join(self.scratch, self.BINNER_RESULT_DIRECTORY)
         self._mkdir_p(result_directory)
 
         cwd = os.getcwd()
@@ -742,10 +791,16 @@ class CocacolaUtil:
         self.generate_cocacola_cut_up_fasta_command(task_params)
 
         # run cocacola make coverage table from bam
-        self.generate_cocacola_coverage_table_from_bam(task_params)
+        #self.generate_cocacola_coverage_table_from_bam(task_params)
+
+        self.generate_cocacola_input_table_from_bam(task_params)
+
+        self.generate_cocacola_composition_table(task_params)
 
         # run cocacola prep and cocacola
         self.generate_cocacola_command(task_params)
+
+        self.add_header_to_post_clustering_file(task_params)
 
         # run cocacola post cluster merging command
         self.generate_cocacola_post_clustering_merging_command(task_params)
@@ -767,7 +822,7 @@ class CocacolaUtil:
 
         # make new BinnedContig object and upload to KBase
         generate_binned_contig_param = {
-            'file_directory': os.path.join(result_directory, self.CONCOCT_BIN_RESULT_DIR),
+            'file_directory': os.path.join(result_directory, self.BINNER_BIN_RESULT_DIR),
             'assembly_ref': task_params['assembly_ref'],
             'binned_contig_name': task_params['binned_contig_name'],
             'workspace_name': task_params['workspace_name']

@@ -1,5 +1,5 @@
 {
-    "ver": "1.3.1",
+    "ver": "1.0.0",
     "authors": [
         "seanjungbluth"
     ],
@@ -141,69 +141,6 @@
               "max_int" : 6,
               "validate_as" : "int"
             }
-        },
-        {
-          "id": "max_clusters_for_vgmm",
-          "optional": true,
-          "advanced": true,
-          "allow_multiple": false,
-          "default_values": [ 400 ],
-          "field_type": "text",
-          "text_options": {
-              "min_int" : 100,
-              "max_int" : 800,
-              "validate_as" : "int"
-            }
-        },
-        {
-          "id": "max_iterations_for_vgmm",
-          "optional": true,
-          "advanced": true,
-          "allow_multiple": false,
-          "default_values": [ 500 ],
-          "field_type": "text",
-          "text_options": {
-              "min_int" : 50,
-              "max_int" : 2000,
-              "validate_as" : "int"
-            }
-        },
-        {
-          "id": "total_percentage_pca",
-          "optional": true,
-          "advanced": true,
-          "allow_multiple": false,
-          "default_values": [ 90 ],
-          "field_type": "text",
-          "text_options": {
-              "min_int" : 10,
-              "max_int" : 100,
-              "validate_as" : "int"
-            }
-        },
-        {
-          "id": "no_cov_normalization",
-          "optional": true,
-          "advanced": true,
-          "allow_multiple": false,
-          "default_values": [ " " ],
-          "field_type": "checkbox",
-          "checkbox_options": {
-              "checked_value": "--no_cov_normalization",
-              "unchecked_value": " "
-            }
-        },
-        {
-          "id": "no_total_coverage",
-          "optional": true,
-          "advanced": true,
-          "allow_multiple": false,
-          "default_values": [ " " ],
-          "field_type": "checkbox",
-          "checkbox_options": {
-              "checked_value": "--no_total_coverage",
-              "unchecked_value": " "
-            }
         }
     ],
     "behavior": {
@@ -249,26 +186,6 @@
                 {
                     "input_parameter": "kmer_size",
                     "target_property": "kmer_size"
-                },
-                {
-                    "input_parameter": "max_clusters_for_vgmm",
-                    "target_property": "max_clusters_for_vgmm"
-                },
-                {
-                    "input_parameter": "max_iterations_for_vgmm",
-                    "target_property": "max_iterations_for_vgmm"
-                },
-                {
-                    "input_parameter": "total_percentage_pca",
-                    "target_property": "total_percentage_pca"
-                },
-                {
-                    "input_parameter": "no_cov_normalization",
-                    "target_property": "no_cov_normalization"
-                },
-                {
-                    "input_parameter": "no_total_coverage",
-                    "target_property": "no_total_coverage"
                 }
             ],
             "output_mapping": [

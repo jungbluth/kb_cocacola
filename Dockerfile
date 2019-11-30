@@ -12,11 +12,14 @@ RUN apt-get update && apt-get install -y libgsl0-dev git zip unzip bedtools bwa 
     apt-get install -y r-base r-cran-gplots
 
 # To download the CONCOCT software from Github and install it and its requirements
-RUN git clone https://github.com/BinPro/CONCOCT && cd /CONCOCT && \
+RUN git clone https://github.com/jungbluth/CONCOCT && cd /CONCOCT && \
     pip install -r requirements.txt && \
     python setup.py install && \
     cd .. && \
     cp -R CONCOCT /kb/deployment/bin/CONCOCT
+
+# Need to add more flexibility to kmer generation script
+# RUN sed -i 's/'.C.:.G.'/'\"C\":\"G\",\"N\":\"N\",\"-\":\"-\"'/' /kb/deployment/bin/CONCOCT/scripts/fasta_to_features.py && sed -i 's/ATGC/ATGCN-/' /kb/deployment/bin/CONCOCT/scripts/fasta_to_features.py
 
 WORKDIR /kb/module/lib/kb_cocacola/bin/
 
@@ -25,9 +28,10 @@ RUN wget https://github.com/lh3/minimap2/releases/download/v2.17/minimap2-2.17.t
 RUN wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/downloads/hisat2-2.1.0-Linux_x86_64.zip && unzip hisat2-* && rm hisat2-2.1.0-Linux_x86_64.zip
 
 
-# Install COCACOLA
+# Install COCACOLA and need to change paths hard-coded inside cocacola.py
 RUN pip install cvxopt
-RUN wget https://www.dropbox.com/s/ciebt2y5h7pb9r2/COCACOLA-python.zip?dl=0 -O /COCACOLA-python.zip && unzip /COCACOLA-python.zip && rm -f /COCACOLA-python.zip && cd COCACOLA-python && chmod +x ./cocacola.py && rm -rf ./data
+RUN wget https://www.dropbox.com/s/ciebt2y5h7pb9r2/COCACOLA-python.zip?dl=0 -O /COCACOLA-python.zip && unzip /COCACOLA-python.zip && rm -f /COCACOLA-python.zip
+RUN cd COCACOLA-python && chmod +x ./cocacola.py && rm -rf ./data && sed -i "s/os.getcwd(),.auxiliary./\'\/kb\',\'module\',\'lib\',\'kb_cocacola\',\'bin\',\'COCACOLA-python\',\'auxiliary\'/" ./cocacola.py
 
 COPY ./ /kb/module
 RUN mkdir -p /kb/module/work

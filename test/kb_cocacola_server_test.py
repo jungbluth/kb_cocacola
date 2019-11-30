@@ -117,22 +117,22 @@ class kb_cocacolaTest(unittest.TestCase):
 
         # READS 2
         # building Interleaved library
-        pe2_reads_filename = 'lib2.oldstyle.fastq'
-        pe2_reads_path = os.path.join(cls.scratch, pe2_reads_filename)
-
-        # gets put on scratch. "work/tmp" is scratch
-        shutil.copy(os.path.join("data", pe2_reads_filename), pe2_reads_path)
-
-        int2_reads_params = {
-            'fwd_file': pe2_reads_path,
-            'sequencing_tech': 'Unknown',
-            'wsname': cls.ws_info[1],
-            'name': 'MyInterleavedLibrary2',
-            'interleaved': 'true'
-        }
-
-        #from scratch upload to workspace
-        cls.int2_oldstyle_reads_ref = cls.ru.upload_reads(int2_reads_params)['obj_ref']
+        # pe2_reads_filename = 'lib2.oldstyle.fastq'
+        # pe2_reads_path = os.path.join(cls.scratch, pe2_reads_filename)
+        #
+        # # gets put on scratch. "work/tmp" is scratch
+        # shutil.copy(os.path.join("data", pe2_reads_filename), pe2_reads_path)
+        #
+        # int2_reads_params = {
+        #     'fwd_file': pe2_reads_path,
+        #     'sequencing_tech': 'Unknown',
+        #     'wsname': cls.ws_info[1],
+        #     'name': 'MyInterleavedLibrary2',
+        #     'interleaved': 'true'
+        # }
+        #
+        # #from scratch upload to workspace
+        # cls.int2_oldstyle_reads_ref = cls.ru.upload_reads(int2_reads_params)['obj_ref']
 
     def getWsClient(self):
         return self.__class__.wsClient
@@ -168,4 +168,5 @@ class kb_cocacolaTest(unittest.TestCase):
                                              'no_cov_normalization': '--no_cov_normalization',
                                              'no_total_coverage': '--no_total_coverage',
                                              'binned_contig_name': 'cocacola_bin_obj',
-                                             'reads_list': [self.int1_oldstyle_reads_ref, self.int2_oldstyle_reads_ref] })
+                                             'reads_list': [self.int1_oldstyle_reads_ref] })
+                                            # 'reads_list': [self.int1_oldstyle_reads_ref, self.int2_oldstyle_reads_ref] })

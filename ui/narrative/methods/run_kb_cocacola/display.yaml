@@ -68,31 +68,6 @@ parameters :
         short-hint : specify kmer length (default 4)
         long-hint  : specify kmer length (default 4)
 
-    max_clusters_for_vgmm :
-        ui-name : Maximum Number of Clusters for VGMM
-        short-hint : specify a maximum number of clusters for VGMM (default 400)
-        long-hint  : specify a maximum number of clusters for VGMM (default 400)
-
-    max_iterations_for_vgmm :
-        ui-name : Maximum Number of Iterations for VGMM
-        short-hint : specify a maximum number of iterations for VGMM (default 500)
-        long-hint  : specify a maximum number of iterations for VGMM (default 500)
-
-    total_percentage_pca :
-        ui-name : Percent of Total PCA Used
-        short-hint : percentage of variance explained by the principal components of the combined data (default 90)
-        long-hint  : percentage of variance explained by the principal components of the combined data (default 90)
-
-    no_cov_normalization :
-        ui-name : Skip Coverage Normalization
-        short-hint : skip coverage normalization step (default false)
-        long-hint  : skip coverage normalization step (default false)
-
-    no_total_coverage :
-        ui-name : Skip Using Total Coverage
-        short-hint : skip adding total coverage to the covergae data matrix (default false)
-        long-hint  : skip adding total coverage to the covergae data matrix (default false)
-
 description : |
     <p>CONCOCT clusters metagenomic contigs into different "bins", each of which should correspond to a putative genome.</p>
 

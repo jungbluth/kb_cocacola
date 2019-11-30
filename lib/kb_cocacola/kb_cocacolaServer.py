@@ -49,6 +49,7 @@ def get_config():
         retconfig[nameval[0]] = nameval[1]
     return retconfig
 
+
 config = get_config()
 
 from kb_cocacola.kb_cocacolaImpl import kb_cocacola  # noqa @IgnorePep8
@@ -487,6 +488,7 @@ class Application(object):
                         60)
         return "%s%+02d:%02d" % (dtnow.isoformat(), hh, mm)
 
+
 application = Application()
 
 # This is the uwsgi application dictionary. On startup uwsgi will look
@@ -597,6 +599,7 @@ def process_async_cli(input_file_path, output_file_path, token):
     with open(output_file_path, "w") as f:
         f.write(json.dumps(resp, cls=JSONObjectEncoder))
     return exit_code
+
 
 if __name__ == "__main__":
     if (len(sys.argv) >= 3 and len(sys.argv) <= 4 and

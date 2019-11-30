@@ -22,7 +22,7 @@ module kb_cocacola {
 
         optional params:
         thread: number of threads; default 1
-        min_contig_length: minimum contig length; default 1000bp
+        min_contig_length: minimum contig length; default 2500bp
         contig_split_size: length to split long contigs; default 10000bp
         contig_split_overlap: length to split long contigs; default 0bp
         ref: https://github.com/BinPro/CONCOCT

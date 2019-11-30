@@ -6,7 +6,6 @@ import json
 
 from kb_cocacola.Utils.CocacolaUtil import CocacolaUtil
 
-from installed_clients.KBaseReportClient import KBaseReport
 #END_HEADER
 
 
@@ -43,7 +42,6 @@ class kb_cocacola:
                             level=logging.INFO)
         #END_CONSTRUCTOR
         pass
-
 
     def run_kb_cocacola(self, ctx, params):
         """

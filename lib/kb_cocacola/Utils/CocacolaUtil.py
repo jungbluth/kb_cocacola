@@ -153,8 +153,6 @@ class CocacolaUtil:
             if len(record.seq) >= min_contig_length:
                 rows_added += 1
                 yield record
-        print(f' - filtered out {rows - rows_added} of {rows} contigs that were shorter '
-              f'than {(min_contig_length)} bp.')
 
     def filter_contigs_by_length(self, fasta_file_path, min_contig_length):
         """ removes all contigs less than the min_contig_length provided """
@@ -451,7 +449,6 @@ class CocacolaUtil:
         task_params['calc_contigs'] = calc_contigs
         self._run_command(command)
 
-
     def generate_cocacola_kmer_composition_table(self, task_params):
         """
         generate_command: cocacola generate kmer composition table
@@ -463,7 +460,7 @@ class CocacolaUtil:
         command += '{}/split_contigs.fa '.format(self.BINNER_RESULT_DIRECTORY)
         command += '{} '.format(calc_contigs)
         command += '{} '.format(kmer_size)
-        command += '{}/split_contigs_kmer_{}.csv'.format(self.BINNER_RESULT_DIRECTORY,kmer_size)
+        command += '{}/split_contigs_kmer_{}.csv'.format(self.BINNER_RESULT_DIRECTORY, kmer_size)
         log('Generated cocacola generate input table from bam command: {}'.format(command))
 
         self._run_command(command)
@@ -480,8 +477,10 @@ class CocacolaUtil:
         command = 'python {}/cocacola.py '.format(self.COCACOLA_BASE_PATH)
         command += '--contig_file {}/split_contigs.fa '.format(self.BINNER_RESULT_DIRECTORY)
         command += '--abundance_profiles {}/coverage_table.tsv '.format(self.BINNER_RESULT_DIRECTORY)
-        command += '--composition_profiles {}/split_contigs_kmer_{}.csv '.format(self.BINNER_RESULT_DIRECTORY,kmer_size)
-        command += '--output {}/cocacola_output_clusters_min{}.csv'.format(self.BINNER_RESULT_DIRECTORY, min_contig_length)
+        command += '--composition_profiles {}/split_contigs_kmer_{}.csv '.format(self.BINNER_RESULT_DIRECTORY,
+                                                                                 kmer_size)
+        command += '--output {}/cocacola_output_clusters_min{}.csv'.format(self.BINNER_RESULT_DIRECTORY,
+                                                                           min_contig_length)
 
         log('Generated cocacola command: {}'.format(command))
 
@@ -490,12 +489,13 @@ class CocacolaUtil:
     def add_header_to_post_clustering_file(self, task_params):
         min_contig_length = task_params['min_contig_length']
         header = "contig_id,cluster_id"
-        with open('{}/cocacola_output_clusters_min{}_headers.csv'.format(self.BINNER_RESULT_DIRECTORY, min_contig_length), 'w') as outfile:
+        with open('{}/cocacola_output_clusters_min{}_headers.csv'.format(self.BINNER_RESULT_DIRECTORY,
+                                                                         min_contig_length), 'w') as outfile:
             outfile.write(header)
-            with open('{}/cocacola_output_clusters_min{}.csv'.format(self.BINNER_RESULT_DIRECTORY, min_contig_length), 'r') as datafile:
+            with open('{}/cocacola_output_clusters_min{}.csv'.format(self.BINNER_RESULT_DIRECTORY,
+                                                                     min_contig_length), 'r') as datafile:
                 for line in datafile:
                     outfile.write(line)
-
 
     def generate_cocacola_post_clustering_merging_command(self, task_params):
         """
@@ -505,7 +505,8 @@ class CocacolaUtil:
         log("\n\nRunning generate_cocacola_post_clustering_merging_command")
 
         command = 'python {}/scripts/merge_cutup_clustering.py '.format(self.CONCOCT_BASE_PATH)
-        command += '{}/cocacola_output_clusters_min{}_headers.csv > '.format(self.BINNER_RESULT_DIRECTORY, min_contig_length)
+        command += '{}/cocacola_output_clusters_min{}_headers.csv > '.format(self.BINNER_RESULT_DIRECTORY,
+                                                                             min_contig_length)
         command += '{}/clustering_merged_min{}.csv'.format(self.BINNER_RESULT_DIRECTORY, min_contig_length)
         log('Generated generate_cocacola_post_clustering_merging command: {}'.format(command))
 
@@ -542,7 +543,7 @@ class CocacolaUtil:
                 if file.endswith('.fa'):
                     os.rename(os.path.abspath(path_to_cocacola_result_bins) + '/' +
                               file, os.path.abspath(path_to_cocacola_result_bins) + '/bin.' +
-                              file.split('.fa')[0].zfill(3) + '.fasta') # need to change to 4 digits
+                              file.split('.fa')[0].zfill(3) + '.fasta')  # need to change to 4 digits
 
     def make_binned_contig_summary_file_for_binning_apps(self, task_params):
         """
@@ -745,12 +746,10 @@ class CocacolaUtil:
         # clean the assembly file so that there are no spaces in the fasta headers
         assembly_clean = self.retrieve_and_clean_assembly(task_params)
 
+        assembly_clean_temp = self.filter_contigs_by_length(assembly_clean, task_params['min_contig_length'])
 
-        assembly_clean_filtered = self.filter_contigs_by_length(assembly_clean, task_params['min_contig_length'])
-
-
-        task_params['contig_file_path'] = assembly_clean_filtered
-        assembly_clean = assembly_clean_filtered # need to clean this up, ugly redundant variable usage
+        task_params['contig_file_path'] = assembly_clean_temp
+        assembly_clean = assembly_clean_temp  # need to clean this up, ugly redundant variable usage
 
         # get reads
         (reads_list_file, read_type) = self.stage_reads_list_file(task_params['reads_list'])
@@ -767,7 +766,7 @@ class CocacolaUtil:
 
         # run alignments, and update input contigs to use the clean file
         # this function has an internal loop to generate a sorted bam file for each input read file
-        sorted_bam_file_list = self.generate_alignment_bams(task_params, assembly_clean)
+        self.generate_alignment_bams(task_params, assembly_clean)
 
         # not used right now
         # depth_file_path = self.generate_make_coverage_table_command(task_params, sorted_bam_file_list)

@@ -1,9 +1,9 @@
 #
 # define display information
 #
-name     : Bin Contigs using CONCOCT - v1.1
-subtitle : Group assembled metagenomic contigs into lineages (Bins) using depth-of-coverage and nucleotide composition
-tooltip  : Groups metagenomic contigs into genome bins using depth-of-coverage and nucleotide composition
+name     : Bin Contigs using COCACOLA - v1.0
+subtitle : Group assembled metagenomic contigs into lineages (Bins) using read COverage, CorrelAtion, sequence COmposition and paired-end read LinkAge
+tooltip  : Groups metagenomic contigs into genome bins using depth-of-coverage, nucleotide composition, correlation, and paired-end read linkage
 
 icon: cocacola.png
 
@@ -69,25 +69,25 @@ parameters :
         long-hint  : specify kmer length (default 4)
 
 description : |
-    <p>CONCOCT clusters metagenomic contigs into different "bins", each of which should correspond to a putative genome.</p>
+    <p>COCACOLA clusters metagenomic contigs into different "bins", each of which should correspond to a putative genome.</p>
 
-    <p>CONCOCT uses nucleotide composition information and source strain abundance (measured by depth-of-coverage by aligning the reads to the contigs) to perform binning.</p>
+    <p>COCACOLA uses nucleotide composition information and source strain abundance (measured by depth-of-coverage by aligning the reads to the contigs) to perform binning. Further, COCACOLA incoroporates correlation and paired-end read linkage information.</p>
     <p><hr></p>
     <p><hr></p>
     <p><i>Implemented for KBase by <a href="mailto:sjungbluth@lbl.gov">Sean Jungbluth(sjungbluth@lbl.gov)</a></i></p>
     <p><hr></p>
-    <p>CONCOCT takes a metagenome assembly and the reads that produced the assembly and organizes the contigs into putative genomes, called "bins".</p>
+    <p>COCACOLA takes a metagenome assembly and the reads that produced the assembly and organizes the contigs into putative genomes, called "bins".</p>
     <p><hr></p>
     <p><b>Configuration:</b></p>
-    <p><b><i>Assembly Object:</i></b> The Assembly object is a collection of assembled genome fragments, called "contigs".  These are the items that CONCOCT will bin.  Currently only a single Assembly object is accepted by the CONCOCT App.</p>
-    <p><b><i>BinnedContig Object Name:</i></b> The BinnedContig Object represents the directory of binned contigs created by CONCOCT. This object can be used for downstream analysis</p>
+    <p><b><i>Assembly Object:</i></b> The Assembly object is a collection of assembled genome fragments, called "contigs".  These are the items that COCACOLA will bin.  Currently only a single Assembly object is accepted by the COCACOLA App.</p>
+    <p><b><i>BinnedContig Object Name:</i></b> The BinnedContig Object represents the directory of binned contigs created by COCACOLA. This object can be used for downstream analysis</p>
     <p><b><i>Read Library Object:</i></b> The read libraries are aligned to the assembly using bbmap, and provide the abundance information for each contig that roughly follows the species abundance.</p>
     <p><b><i>Minimum Contig Length:</i></b> Contigs that are too short may slow down analysis and not give statistically meaningful nucleotide composition profiles.  A value of 1000 - 2500 bp is a reasonable cutoff.</p>
     <p><hr></p>
     <p><b>Output:</b></p>
-    <p><b><i>Output Object:</i></b>The BinnedContig Object represents the directory of binned contigs created by CONCOCT. This object can be used for downstream analysis.</p>
+    <p><b><i>Output Object:</i></b>The BinnedContig Object represents the directory of binned contigs created by COCACOLA. This object can be used for downstream analysis.</p>
     <p><b><i>Output Bin Summary Report:</i></b>The number of bins produced, the number of contigs that were binned and the total number of contigs in the assembly.</p>
-    <p><b><i>Downloadable files:</i></b> The enitre output of the CONCOCT run may be downloaded as a zip file. This zip file also contains a table of read-depth coverage per contig ("*.depth.txt")</p>
+    <p><b><i>Downloadable files:</i></b> The enitre output of the COCACOLA run may be downloaded as a zip file. This zip file also contains a table of read-depth coverage per contig ("*.depth.txt")</p>
     <p><b><u>column definitions for *.depth.txt file</u></p>
     <table style="width:50%">
     <tr><td>1. contig name</td></tr>
@@ -99,12 +99,12 @@ description : |
 
 publications:
     -
-        pmid : 25218180
+        pmid : 27256312
         display-text : |
-            Alneberg J, Bjarnason BS, de Bruijn I, Schirmer M, Quick J, Ijaz UZ, Lahti L, Loman NJ, Andersson AF, Quince C. Binning metagenomic contigs by coverage and composition. Nature Methods. 2014;11: 1144-1146. doi:10.1038/nmeth.3103
+            Lu YY, Chen T, Fuhrman JA, Sun F. COCACOLA: binning metagenomic contigs using sequence COmposition, read CoverAge, CO-alignment and paired-end read LinkAge. Bioinformatics. 2017;33: 791-798. doi:10.1093/bioinformatics/btw290
         link: https://doi.org/10.1038/nmeth.3103
 
     -
         display-text : |
-            CONCOCT source:
-        link: https://github.com/BinPro/CONCOCT
+            COCACOLA source:
+        link: https://github.com/younglululu/COCACOLA

@@ -433,19 +433,6 @@ class CocacolaUtil:
 
         self._run_command(command)
 
-    def generate_cocacola_coverage_table_from_bam(self, task_params):
-        """
-        generate_command: cocacola generate coverage table
-        """
-        log("\n\nRunning generate_cocacola_coverage_table_from_bam")
-        command = 'python {}/scripts/concoct_coverage_table.py temp.bed '.format(self.CONCOCT_BASE_PATH)
-        command += '{}/*_sorted.bam > '.format(self.BINNER_RESULT_DIRECTORY)
-        command += '{}/coverage_table.tsv'.format(self.BINNER_RESULT_DIRECTORY)
-        log('Generated cocacola generate coverage table from bam command: {}'.format(command))
-
-        self._run_command(command)
-
-
     def generate_cocacola_input_table_from_bam(self, task_params):
         """
         generate_command: cocacola generate input table
@@ -466,11 +453,11 @@ class CocacolaUtil:
         self._run_command(command)
 
 
-    def generate_cocacola_composition_table(self, task_params):
+    def generate_cocacola_kmer_composition_table(self, task_params):
         """
-        generate_command: cocacola generate composition table
+        generate_command: cocacola generate kmer composition table
         """
-        log("\n\nRunning generate_cocacola_composition_table")
+        log("\n\nRunning generate_cocacola_kmer_composition_table")
         calc_contigs = task_params['calc_contigs']
         kmer_size = task_params['kmer_size']
         command = 'python {}/scripts/fasta_to_features.py '.format(self.CONCOCT_BASE_PATH)
@@ -790,16 +777,16 @@ class CocacolaUtil:
         # run cocacola prep, cut up fasta input
         self.generate_cocacola_cut_up_fasta_command(task_params)
 
-        # run cocacola make coverage table from bam
-        #self.generate_cocacola_coverage_table_from_bam(task_params)
-
+        # run cococola prep, generate coverage tables from bam
         self.generate_cocacola_input_table_from_bam(task_params)
 
-        self.generate_cocacola_composition_table(task_params)
+        # run cococola prep, generate kmer table
+        self.generate_cocacola_kmer_composition_table(task_params)
 
         # run cocacola prep and cocacola
         self.generate_cocacola_command(task_params)
 
+        # run command to add header to output file
         self.add_header_to_post_clustering_file(task_params)
 
         # run cocacola post cluster merging command

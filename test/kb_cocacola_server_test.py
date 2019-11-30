@@ -115,8 +115,8 @@ class kb_cocacolaTest(unittest.TestCase):
         print("cls.int1_oldstyle_reads_ref***")
         print(str(cls.int1_oldstyle_reads_ref))
 
-        READS 2
-        building Interleaved library
+        #READS 2
+        #building Interleaved library
         pe2_reads_filename = 'lib2.oldstyle.fastq'
         pe2_reads_path = os.path.join(cls.scratch, pe2_reads_filename)
 
@@ -162,10 +162,114 @@ class kb_cocacolaTest(unittest.TestCase):
                                              'contig_split_size': 10000,
                                              'contig_split_overlap': 0,
                                              'kmer_size': 4,
-                                             'max_clusters_for_vgmm': 400,
-                                             'max_iterations_for_vgmm': 500,
-                                             'total_percentage_pca': 90,
-                                             'no_cov_normalization': '--no_cov_normalization',
-                                             'no_total_coverage': '--no_total_coverage',
                                              'binned_contig_name': 'cocacola_bin_obj',
                                              'reads_list': [self.int1_oldstyle_reads_ref, self.int2_oldstyle_reads_ref] })
+
+
+    def test_run_cocacola_bowtie2_default_mapping_input(self):
+        method_name = 'test_run_cocacola_bowtie2_default_mapping_input'
+        print ("\n=================================================================")
+        print ("RUNNING "+method_name+"()")
+        print ("=================================================================\n")
+
+        # cocacola should run to completion here
+        ret = self.getImpl().run_kb_cocacola(self.getContext(),
+                                            {'workspace_name': self.getWsName(),
+                                             'assembly_ref': self.assembly_ref,
+                                             'read_mapping_tool': 'bowtie2_default',
+                                             'min_contig_length': 3000,
+                                             'contig_split_size': 10000,
+                                             'contig_split_overlap': 0,
+                                             'kmer_size': 4,
+                                             'binned_contig_name': 'cocacola_bin_obj',
+                                             'reads_list': [self.int1_oldstyle_reads_ref] })
+
+    def test_run_cocacola_bowtie2_very_sensitive_mapping_input(self):
+        method_name = 'test_run_cocacola_bowtie2_very_sensitive_mapping_input'
+        print ("\n=================================================================")
+        print ("RUNNING "+method_name+"()")
+        print ("=================================================================\n")
+
+        # cocacola should run to completion here
+        ret = self.getImpl().run_kb_cocacola(self.getContext(),
+                                            {'workspace_name': self.getWsName(),
+                                             'assembly_ref': self.assembly_ref,
+                                             'read_mapping_tool': 'bowtie2_very_sensitive',
+                                             'min_contig_length': 3000,
+                                             'contig_split_size': 10000,
+                                             'contig_split_overlap': 0,
+                                             'kmer_size': 4,
+                                             'binned_contig_name': 'cocacola_bin_obj',
+                                             'reads_list': [self.int1_oldstyle_reads_ref] })
+
+    def test_run_cocacola_hisat2_mapping_input(self):
+        method_name = 'test_run_cocacola_hisat2_mapping_input'
+        print ("\n=================================================================")
+        print ("RUNNING "+method_name+"()")
+        print ("=================================================================\n")
+
+        # cocacola should run to completion here
+        ret = self.getImpl().run_kb_cocacola(self.getContext(),
+                                            {'workspace_name': self.getWsName(),
+                                             'assembly_ref': self.assembly_ref,
+                                             'read_mapping_tool': 'hisat2',
+                                             'min_contig_length': 3000,
+                                             'contig_split_size': 10000,
+                                             'contig_split_overlap': 0,
+                                             'kmer_size': 4,
+                                             'binned_contig_name': 'cocacola_bin_obj',
+                                             'reads_list': [self.int1_oldstyle_reads_ref] })
+
+    def test_run_cocacola_bbmap_mapping_input(self):
+        method_name = 'test_run_cocacola_bbmap_mapping_input'
+        print ("\n=================================================================")
+        print ("RUNNING "+method_name+"()")
+        print ("=================================================================\n")
+
+        # cocacola should run to completion here
+        ret = self.getImpl().run_kb_cocacola(self.getContext(),
+                                            {'workspace_name': self.getWsName(),
+                                             'assembly_ref': self.assembly_ref,
+                                             'read_mapping_tool': 'bbmap',
+                                             'min_contig_length': 3000,
+                                             'contig_split_size': 10000,
+                                             'contig_split_overlap': 0,
+                                             'kmer_size': 4,
+                                             'binned_contig_name': 'cocacola_bin_obj',
+                                             'reads_list': [self.int1_oldstyle_reads_ref] })
+
+    def test_run_cocacola_minimap2_mapping_input(self):
+        method_name = 'test_run_cocacola_minimap2_mapping_input'
+        print ("\n=================================================================")
+        print ("RUNNING "+method_name+"()")
+        print ("=================================================================\n")
+
+        # cocacola should run to completion here
+        ret = self.getImpl().run_kb_cocacola(self.getContext(),
+                                            {'workspace_name': self.getWsName(),
+                                             'assembly_ref': self.assembly_ref,
+                                             'read_mapping_tool': 'minimap2',
+                                             'min_contig_length': 3000,
+                                             'contig_split_size': 10000,
+                                             'contig_split_overlap': 0,
+                                             'kmer_size': 4,
+                                             'binned_contig_name': 'cocacola_bin_obj',
+                                             'reads_list': [self.int1_oldstyle_reads_ref] })
+
+    def test_run_cocacola_bwa_mapping_input(self):
+        method_name = 'test_run_cocacola_bwa_mapping_input'
+        print ("\n=================================================================")
+        print ("RUNNING "+method_name+"()")
+        print ("=================================================================\n")
+
+        # cocacola should run to completion here
+        ret = self.getImpl().run_kb_cocacola(self.getContext(),
+                                            {'workspace_name': self.getWsName(),
+                                             'assembly_ref': self.assembly_ref,
+                                             'read_mapping_tool': 'bwa',
+                                             'min_contig_length': 3000,
+                                             'contig_split_size': 10000,
+                                             'contig_split_overlap': 0,
+                                             'kmer_size': 4,
+                                             'binned_contig_name': 'cocacola_bin_obj',
+                                             'reads_list': [self.int1_oldstyle_reads_ref] })

@@ -448,7 +448,6 @@ class CocacolaUtil:
         for line in open('{}/split_contigs.fa'.format(self.BINNER_RESULT_DIRECTORY)):
             if line.startswith(">"):
                 calc_contigs += 1
-        log('Calc-contigs: {}'.format(calc_contigs))
         task_params['calc_contigs'] = calc_contigs
         self._run_command(command)
 
@@ -798,6 +797,7 @@ class CocacolaUtil:
         # run fasta renaming
         self.rename_and_standardize_bin_names(task_params)
 
+        # make binned contig summary file
         self.make_binned_contig_summary_file_for_binning_apps(task_params)
 
         # file handling and management

@@ -3,7 +3,7 @@
 
 1.0.0
 -----
-* Initial release
+* Initial release, features and code largely from kb_concoct
 
 0.0.0
 -----

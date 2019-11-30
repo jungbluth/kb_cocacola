@@ -1,0 +1,17 @@
+BBSketch Guide
+Written by Brian Bushnell
+Last updated October 19, 2017
+
+
+Quick Start
+
+The most typical way to use BBSketch is to download and unzip the BBMap package, and then run SendSketch on your data:
+
+sensketch.sh in=assembly.fasta
+or
+sensketch.sh in=reads.fq.gz reads=400k
+
+
+
+Overview
+

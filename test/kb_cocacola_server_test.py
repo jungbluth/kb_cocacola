@@ -17,13 +17,11 @@ from installed_clients.AssemblyUtilClient import AssemblyUtil
 from installed_clients.DataFileUtilClient import DataFileUtil
 from installed_clients.ReadsUtilsClient import ReadsUtils
 
-
-
 class kb_cocacolaTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        #token = os.environ.get('KB_AUTH_TOKEN', None)
+        # token = os.environ.get('KB_AUTH_TOKEN', None)
         cls.token = os.environ.get('KB_AUTH_TOKEN', None)
         config_file = os.environ.get('KB_DEPLOYMENT_CONFIG', None)
         cls.cfg = {}

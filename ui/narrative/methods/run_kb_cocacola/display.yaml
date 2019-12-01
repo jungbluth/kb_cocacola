@@ -46,7 +46,7 @@ parameters :
     read_mapping_tool :
         ui-name : Read Mapping Tool
         short-hint : tool to use for read mapping (default bowtie2)
-        long-hint  : tool to use for read mapping - options BBmap, Bowtie2 (default), Bowtie2 (very-sensitive), BWA-MEM, HISAT2, minimap2 - (default bowtie2)
+        long-hint  : tool to use for read mapping - options BBmap, Bowtie2 (default), Bowtie2 (very-sensitive), BWA-MEM, HISAT2, minimap2 - (default bowtie2 default mode)
 
     min_contig_length :
         ui-name : Minimum Contig Length (>1000bp)
@@ -83,26 +83,22 @@ description : |
     <p><b><i>BinnedContig Object Name:</i></b> The BinnedContig Object represents the directory of binned contigs created by COCACOLA. This object can be used for downstream analysis</p>
     <p><b><i>Read Library Object:</i></b> The read libraries are aligned to the assembly using bbmap, and provide the abundance information for each contig that roughly follows the species abundance.</p>
     <p><b><i>Minimum Contig Length:</i></b> Contigs that are too short may slow down analysis and not give statistically meaningful nucleotide composition profiles.  A value of 1000 - 2500 bp is a reasonable cutoff.</p>
+    <p><b><i>Contig Split Size:</i></b> Contigs are split before clustering to minimize the bias imposed by very large contigs. A value of 5000-10000 bp is a reasonable cutoff.</p>
+    <p><b><i>Contig Split Overlap:</i></b> Contigs split before clustering can have varying degrees of overlap.  A value of 0 is most often used.</p>
+    <p><b><i>Kmer Length:</i></b> Size of the kmers used during profiling.  A default value of 4 is reasonable to start with.</p>
+
     <p><hr></p>
     <p><b>Output:</b></p>
     <p><b><i>Output Object:</i></b>The BinnedContig Object represents the directory of binned contigs created by COCACOLA. This object can be used for downstream analysis.</p>
     <p><b><i>Output Bin Summary Report:</i></b>The number of bins produced, the number of contigs that were binned and the total number of contigs in the assembly.</p>
     <p><b><i>Downloadable files:</i></b> The enitre output of the COCACOLA run may be downloaded as a zip file. This zip file also contains a table of read-depth coverage per contig ("*.depth.txt")</p>
-    <p><b><u>column definitions for *.depth.txt file</u></p>
-    <table style="width:50%">
-    <tr><td>1. contig name</td></tr>
-    <tr><td>2. contig length</td></tr>
-    <tr><td>3. total average depth (all libraries)</td></tr>
-    <tr><td>4. library 1 depth</td></tr>
-    <tr><td>5. library 1 variance</td></tr>
-    <tr><td>6. next library ... etc</td></tr></table>
 
 publications:
     -
         pmid : 27256312
         display-text : |
             Lu YY, Chen T, Fuhrman JA, Sun F. COCACOLA: binning metagenomic contigs using sequence COmposition, read CoverAge, CO-alignment and paired-end read LinkAge. Bioinformatics. 2017;33: 791-798. doi:10.1093/bioinformatics/btw290
-        link: https://doi.org/10.1038/nmeth.3103
+        link: https://doi.org/10.1093/bioinformatics/btw290
 
     -
         display-text : |
